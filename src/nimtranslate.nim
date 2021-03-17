@@ -28,7 +28,7 @@ proc getArgs(args: openarray[(string, string)]): string =
 func newTranslator*(
     sourcelang: string = "auto",
     toLang: string = "en",
-    client: string = "dict-chrome-ex",
+    client: string = "gtx",
     dt: string = "t"
 ): Translator =                 
     result.sourcelang = sourcelang        
@@ -42,20 +42,22 @@ proc translate*(
     text: string,
     sourcelang: string = "auto",
     toLang: string = "en",
-    client: string = "dict-chrome-ex",
+    client: string = "gtx",
     dt: string = "t"
 ): Future[TranslatedObject] {.async.} =
     let client = newAsyncHttpClient()
     let params = {
         "client": self.client,
+        "dj": "1",
+        "dt": "t",
         "sl": if sourcelang != self.sourcelang: sourcelang else: self.sourcelang,
         "tl": if toLang != self.toLang: toLang else: self.toLang,
         "q": text,
         "ie": "utf-8",
-        "oe": "utf-8",
+        "oe": "utf-8"
     }
 
-    const url = "https://clients5.google.com/translate_a/t"
+    const url = "https://translate.googleapis.com/translate_a/single"
 
     var response = await client.request(
         url&getArgs(params),
@@ -75,7 +77,7 @@ proc translate*(
 proc detect*(
     self: Translator,
     text: string,
-    client: string = "dict-chrome-ex",
+    client: string = "gtx",
     dt: string = "t"
 ): Future[string] {.async.} =
     return (await self.translate(text)).detectedLang
